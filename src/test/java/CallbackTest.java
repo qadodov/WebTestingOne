@@ -16,7 +16,6 @@ public class CallbackTest {
 
     @BeforeAll
     public static void SetUpAll() {
-//        System.setProperty("webdriver.chrome.driver", "./driver/win/chromedriver.exe");
         WebDriverManager.chromedriver().setup();
     }
 
@@ -50,13 +49,50 @@ public class CallbackTest {
     }
 
     @Test
-    public void shouldShowValidationError() {
+    public void shouldShowValidationErrorWrongNameField() {
         driver.get("http://localhost:9999");
         driver.findElement(By.cssSelector("span[data-test-id='name'] input")).sendKeys("Ilkhom Dodov");
         driver.findElement(By.tagName("button")).click();
-        String validationErrorText = driver.findElement(By.cssSelector("span.input_invalid .input__sub")).getText();
+        String validationErrorTextForWrongName = driver.findElement(By.cssSelector("span.input_invalid .input__sub")).getText();
         String expected = "Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы.";
 
-        assertEquals(validationErrorText, expected);
+        assertEquals(validationErrorTextForWrongName, expected);
+    }
+
+    @Test
+    public void shouldShowValidationErrorWrongNumber() {
+        driver.get("http://localhost:9999");
+        driver.findElement(By.cssSelector("span[data-test-id='name'] input")).sendKeys("Ильхом Додов");
+        driver.findElement(By.cssSelector("span[data-test-id='phone'] input")).sendKeys("+7999777884");
+        driver.findElement(By.tagName("button")).click();
+        String validationErrorTextForWrongPhone = driver.findElement(By.cssSelector("[data-test-id='phone'] .input__sub")).getText();
+        String expected = "Телефон указан неверно. Должно быть 11 цифр, например, +79012345678.";
+
+        assertEquals(expected, validationErrorTextForWrongPhone);
+    }
+
+    @Test
+    public void shouldShowValidationErrorUncheckedCheckbox() {
+        driver.get("http://localhost:9999");
+        driver.findElement(By.cssSelector("span[data-test-id='name'] input")).sendKeys("Ильхом Додов");
+        driver.findElement(By.cssSelector("span[data-test-id='phone'] input")).sendKeys("+79997778844");
+        driver.findElement(By.tagName("button")).click();
+
+        String validationErrorTextForUncheckedCheckbox = driver.findElement(By.cssSelector(".input_invalid .checkbox__text")).getText().trim();
+
+        String expected = "Я соглашаюсь с условиями обработки и использования моих персональных данных и разрешаю сделать запрос в бюро кредитных историй";
+
+        assertEquals(expected, validationErrorTextForUncheckedCheckbox);
+    }
+
+    @Test
+    public void shouldShowValidationErrorForBlankField() {
+        driver.get("http://localhost:9999");
+        driver.findElement(By.tagName("button")).click();
+        String validationErrorTextForBlankField = driver.findElement(By.cssSelector("[data-test-id='name'] .input__sub")).getText().trim();
+
+        String expected = "Поле обязательно для заполнения";
+
+        assertEquals(expected, validationErrorTextForBlankField);
     }
 }
